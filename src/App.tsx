@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { useEffect } from "react";
+import clsx from "clsx";
 
 function App() {
+  const word = "world";
   const [guess, setGuess] = useState<string>("");
   const [previousGuesses, setPreviousGuesses] = useState<string[]>([]);
+
+  const tileStyle = clsx();
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -42,7 +46,15 @@ function App() {
                 .fill(null)
                 .map((_, letter) => (
                   // Tile
-                  <div className="flex aspect-square w-16 items-center justify-center border-2 bg-white text-3xl font-bold uppercase">
+                  <div
+                    className={clsx(
+                      `flex aspect-square w-16 items-center justify-center border-2 bg-white text-4xl font-bold uppercase`,
+                      {
+                        "border-green-600 bg-green-500 text-white":
+                          previousGuesses?.[row]?.[letter] === word[letter],
+                      },
+                    )}
+                  >
                     {previousGuesses.length === row
                       ? guess[letter]
                       : previousGuesses?.[row]?.[letter]}
