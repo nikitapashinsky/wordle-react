@@ -7,10 +7,9 @@ function App() {
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      const alphabet = "abcdefghijklmnopqrstuvwxyz";
       const key = event.key;
 
-      if ([...alphabet].includes(key) && guess.length < 5) {
+      if (key >= "a" && key <= "z" && key.length === 1 && guess.length < 5) {
         setGuess((prevGuess) => prevGuess + key);
       } else if (key === "Backspace") {
         setGuess(guess.slice(0, -1));
