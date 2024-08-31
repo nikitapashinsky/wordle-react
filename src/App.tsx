@@ -10,22 +10,43 @@ enum GuessStatus {
   Absent = "ABSENT",
 }
 
-const answer = answers[Math.floor(Math.random() * answers.length)];
+// The game can be won and lost
+// The game can be in progress and finished
 
-console.log(answer);
+type GameState = "running" | "finished";
 
 function App() {
+  const [answer, setAnswer] = useState(() => getAnswer());
+  const [gameState, setGameState] = useState<GameState>("running");
+  const [currentAttempt, setCurrentAttempt] = useState<number>(1);
   const [guess, setGuess] = useState<string>("");
   const [previousGuesses, setPreviousGuesses] = useState<string[]>([]);
   const [previousGuessStatuses, setPreviousGuessStatuses] = useState<
     GuessStatus[][]
   >([]);
 
+  function getAnswer() {
+    const answer = answers[Math.floor(Math.random() * answers.length)];
+    console.log(answer);
+    return answer;
+  }
+
+  function handleRestart() {
+    setCurrentAttempt(1);
+    setPreviousGuesses([]);
+    setPreviousGuessStatuses([]);
+    setAnswer(getAnswer());
+    setGameState("running");
+  }
+
   useEffect(() => {
+    if (currentAttempt > 6) {
+      setGameState("finished");
+    }
+
     function checkWord(guess: string) {
       const result: GuessStatus[] = new Array(5).fill(null);
       const answerArray = [...answer];
-      console.log(answerArray);
 
       // FIRST, check for letters that are in word AND in correct position
       for (let i = 0; i < 5; i++) {
@@ -48,8 +69,6 @@ function App() {
         }
       }
 
-      console.log(answerArray);
-
       for (let i = 0; i < 5; i++) {
         if (
           result[i] !== GuessStatus.Correct &&
@@ -61,26 +80,34 @@ function App() {
         }
       }
 
-      console.log(answerArray);
-
       setPreviousGuessStatuses((prevStatuses) => [...prevStatuses, result]);
+
+      if (
+        !result.includes(GuessStatus.Present) &&
+        !result.includes(GuessStatus.Absent)
+      ) {
+        setGameState("finished");
+      }
     }
 
     function handleKeyDown(event: KeyboardEvent) {
       const key = event.key;
 
-      if (key >= "a" && key <= "z" && key.length === 1 && guess.length < 5) {
-        setGuess((prevGuess) => prevGuess + key);
-      } else if (key === "Backspace") {
-        setGuess(guess.slice(0, -1));
-      } else if (
-        key === "Enter" &&
-        guess.length === 5 &&
-        (validWords.includes(guess) || answers.includes(guess))
-      ) {
-        setPreviousGuesses((prevGuesses) => [...prevGuesses, guess]);
-        checkWord(guess);
-        setGuess("");
+      if (gameState === "running") {
+        if (key >= "a" && key <= "z" && key.length === 1 && guess.length < 5) {
+          setGuess((prevGuess) => prevGuess + key);
+        } else if (key === "Backspace") {
+          setGuess(guess.slice(0, -1));
+        } else if (
+          key === "Enter" &&
+          guess.length === 5 &&
+          (validWords.includes(guess) || answers.includes(guess))
+        ) {
+          setPreviousGuesses((prevGuesses) => [...prevGuesses, guess]);
+          checkWord(guess);
+          setCurrentAttempt((prev) => prev + 1);
+          setGuess("");
+        }
       }
     }
 
@@ -89,10 +116,21 @@ function App() {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [guess]);
+  }, [guess, currentAttempt, answer, gameState]);
 
   return (
     <>
+      {gameState === "finished" && (
+        <div className="mx-auto mt-12 flex max-w-md flex-col gap-2">
+          <h1 className="text-3xl dark:text-white">Game finished</h1>
+          <button
+            onClick={handleRestart}
+            className="max-w-fit rounded-lg p-2 text-white dark:bg-neutral-600"
+          >
+            Restart?
+          </button>
+        </div>
+      )}
       <div className="mx-auto mt-12 flex max-w-md flex-col gap-2">
         {Array(6)
           .fill(null)
