@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 import { answers } from "./data/answers";
 import { validWords } from "./data/validWords";
+import bevelUrl from "./assets/Bevel.svg";
 
 enum GuessStatus {
   Correct = "CORRECT",
@@ -121,22 +122,30 @@ function App() {
   return (
     <>
       {gameState === "finished" && (
-        <div className="mx-auto mt-12 flex max-w-md flex-col gap-2">
-          <h1 className="text-3xl dark:text-white">Game finished</h1>
+        <div className="fixed z-50 flex h-full w-full flex-col items-center justify-center gap-8 bg-black/70">
+          <h1 className="text-3xl font-bold tracking-tight dark:text-white">
+            Game finished
+          </h1>
           <button
             onClick={handleRestart}
-            className="max-w-fit rounded-lg p-2 text-white dark:bg-neutral-600"
+            className="max-w-fit select-none rounded-xl px-4 py-2 font-bold text-white shadow-[0px_6px_black] shadow-green-800 transition-all active:translate-y-1 active:shadow-[0px_4px_black] active:shadow-green-800 dark:bg-green-600"
           >
             Restart?
           </button>
         </div>
       )}
-      <div className="mx-auto mt-12 flex max-w-md flex-col gap-2">
+      <div className="relative mx-auto flex w-fit flex-col gap-5 pt-40">
         {Array(6)
           .fill(null)
           .map((_, row) => (
             // Row
-            <div className="flex gap-2">
+            <div
+              className={twMerge(
+                clsx("flex gap-1", {
+                  "opacity-50": previousGuesses.length < row,
+                }),
+              )}
+            >
               {Array(5)
                 .fill(null)
                 .map((_, letter) => (
@@ -144,19 +153,19 @@ function App() {
                   <div
                     className={twMerge(
                       clsx(
-                        `flex aspect-square w-16 items-center justify-center border-2 border-neutral-200 bg-white text-4xl font-bold uppercase dark:border-neutral-800 dark:bg-neutral-900 dark:text-white`,
+                        `relative box-content flex aspect-square h-16 w-16 items-center justify-center bg-white text-4xl font-extrabold uppercase shadow-[0px_8px_0px_white] ring-2 ring-inset ring-neutral-400 transition-all first:rounded-l-xl last:rounded-r-xl dark:bg-neutral-800 dark:text-neutral-200 dark:shadow-neutral-800 dark:ring-2 dark:ring-inset dark:ring-white/[0.075]`,
                         {
-                          "border-green-700 bg-green-600 text-white dark:border-green-600 dark:bg-green-700":
+                          "bg-green-600 text-white dark:bg-green-700 dark:shadow-green-900":
                             previousGuessStatuses?.[row]?.[letter] ===
                             GuessStatus.Correct,
                         },
                         {
-                          "border-yellow-700 bg-yellow-500 dark:border-yellow-500 dark:bg-yellow-600":
+                          "bg-yellow-500 dark:bg-yellow-600 dark:shadow-yellow-800":
                             previousGuessStatuses?.[row]?.[letter] ===
                             GuessStatus.Present,
                         },
                         {
-                          "border-neutral-400 bg-neutral-300 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-500":
+                          "bg-neutral-300 dark:bg-neutral-800 dark:text-neutral-600 dark:shadow-neutral-800":
                             previousGuessStatuses?.[row]?.[letter] ===
                             GuessStatus.Absent,
                         },
@@ -176,3 +185,19 @@ function App() {
 }
 
 export default App;
+
+/*
+<img
+  src={bevelUrl}
+  className={twMerge(
+    clsx(
+      "absolute -left-[7px] -top-[3px] -z-10 min-h-fit min-w-fit touch-none select-none",
+      {
+        "-top-[5px]":
+          previousGuessStatuses?.[row]?.[letter] !==
+          GuessStatus.Correct,
+      },
+    ),
+  )}
+/>
+*/
